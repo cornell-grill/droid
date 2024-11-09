@@ -2,14 +2,14 @@ import os
 import random
 from collections import defaultdict
 
-from droid.camera_utils.camera_readers.realsense_camera import gather_cameras
+from droid.camera_utils.camera_readers.zed_camera_old import gather_zed_cameras
 from droid.camera_utils.info import get_camera_type
 
 
 class MultiCameraWrapper:
     def __init__(self, camera_kwargs={}):
         # Open Cameras #
-        zed_cameras = gather_cameras()
+        zed_cameras = gather_zed_cameras()
         self.camera_dict = {cam.serial_number: cam for cam in zed_cameras}
 
         # Set Correct Parameters #

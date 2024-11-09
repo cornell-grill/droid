@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict
 from copy import deepcopy
+import os
 
 import cv2
 import numpy as np
@@ -158,14 +159,17 @@ def calibrate_camera(
     intrinsics_dict = camera.get_intrinsics()
     if hand_camera:
         calibrator = HandCameraCalibrator(intrinsics_dict)
+        print("Hand Camera Calibration Selected")
     else:
         calibrator = ThirdPersonCameraCalibrator(intrinsics_dict)
+        print("Third Person Camera Calibration Selected")
 
     if reset_robot:
         env.reset()
     controller.reset_state()
 
     while True:
+        # print("Calibrating...")
         # Collect Controller Info #
         controller_info = controller.get_info()
         start_time = time.time()
@@ -178,6 +182,11 @@ def calibrate_camera(
             if camera_id not in full_cam_id:
                 continue
             cam_obs["image"][full_cam_id] = calibrator.augment_image(full_cam_id, cam_obs["image"][full_cam_id])
+            # save observation
+            img = deepcopy(cam_obs["image"][full_cam_id])
+            if os.path.exists("/home/chuanruo/droid/calibration_images") is False:
+                os.makedirs("/home/chuanruo/droid/calibration_images")
+            cv2.imwrite(f"calibration_images/{full_cam_id}.png", img)
         if obs_pointer is not None:
             obs_pointer.update(cam_obs)
 
@@ -202,6 +211,7 @@ def calibrate_camera(
 
         # Close Files And Return #
         if start_calibration:
+            print("Calibration Start successful")
             break
         if end_calibration:
             return False
@@ -210,6 +220,8 @@ def calibrate_camera(
     time.time()
     pose_origin = state["cartesian_position"]
     i = 0
+
+    print("Start Calibration...")
 
     while True:
         # Check For Termination #
@@ -245,7 +257,7 @@ def calibrate_camera(
         calib_pose = calibration_traj(i * step_size, hand_camera=hand_camera)
         desired_pose = change_pose_frame(calib_pose, pose_origin)
         action = np.concatenate([desired_pose, [0]])
-        env.update_robot(action, action_space="cartesian_position", blocking=False)
+        env.update_robot(action, action_space="cartesian_position", gripper_action_space="velocity", blocking=False)
 
         # Regularize Control Frequency #
         comp_time = time.time() - start_time
@@ -259,6 +271,7 @@ def calibrate_camera(
             break
         i += 1
 
+    print("Calibration Complete!")
     # SAVE INTO A JSON
     for full_cam_id in cam_obs["image"]:
         if camera_id not in full_cam_id:
@@ -268,6 +281,8 @@ def calibrate_camera(
             return False
         transformation = calibrator.calibrate(full_cam_id)
         update_calibration_info(full_cam_id, transformation)
+
+    print("Calibration Successful!")
 
     return True
 

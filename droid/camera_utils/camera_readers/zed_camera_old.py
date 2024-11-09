@@ -12,7 +12,7 @@ except ModuleNotFoundError:
     print("WARNING: You have not setup the ZED cameras, and currently cannot use them")
 
 
-def gather_cameras():
+def gather_zed_cameras():
     all_zed_cameras = []
     try:
         cameras = sl.Camera.get_device_list()
