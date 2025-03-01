@@ -76,7 +76,7 @@ class RobotEnv(gym.Env):
         action_info = self._robot.update_command(
             action,
             action_space=action_space,
-            gripper_action_space=gripper_action_space,
+            gripper_action_space=gripper_action_space or self.gripper_action_space,
             blocking=blocking
         )
         return action_info

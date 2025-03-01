@@ -6,10 +6,10 @@ from droid.trajectory_utils.misc import calibrate_camera
 env = RobotEnv()
 env.gripper_action_space = "velocity"
 controller = VRPolicy()
-camera_id = "243222071972"
-camera_id2 = "243522075067"
+hand_camera_id = "243222071972"
+ext_camera_id = "243522075067"
 
-print("Ready?")
-# calibrate_camera(env, camera_id, controller)
+input("Ready? Press Enter to continue calibrating hand camera...")
+calibrate_camera(env, hand_camera_id, controller)
 input("Press Enter to continue third person camera calibration...")
-calibrate_camera(env, camera_id2, controller)
+calibrate_camera(env, ext_camera_id, controller)
