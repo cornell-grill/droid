@@ -178,8 +178,9 @@ class Realsense:
         if self.image:
             color_frame = aligned_frames.get_color_frame()
             depth_frame = aligned_frames.get_depth_frame()
+            depth_units = depth_frame.get_units()
             data_dict["image"] = {self.serial_number: self._process_frame(color_frame)}
-            data_dict["depth"] = {self.serial_number: self._process_frame(depth_frame)}
+            data_dict["depth"] = {self.serial_number: self._process_frame(depth_frame) * depth_units}
 
         return data_dict, timestamp_dict
 

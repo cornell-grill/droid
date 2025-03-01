@@ -33,7 +33,12 @@
         # serial: image in standard numpy H*W*3
         '243222071972': "array of shape 480*640*3, type np.uint8", 
         '243522075067': "array of shape 480*640*3, type np.uint8"
-    }
+    },
+    'depth': {
+        # serial: depth image in standard numpy H*W
+        '243222071972': "array of shape 480*640, type np.float32", 
+        '243522075067': "array of shape 480*640, type np.float32"
+    },
     'camera_type': {
         # serial: is 3rd person cam (1 is true, 0 is false)
         '243222071972': 0, 
