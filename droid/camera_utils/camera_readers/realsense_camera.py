@@ -150,8 +150,8 @@ class Realsense:
 
     ### Basic Camera Utilities ###
     def _process_frame(self, frame):
-        image = np.asanyarray(frame.get_data(), dtype=np.uint8)
-        image = deepcopy(image)
+        image = np.asanyarray(frame.get_data())
+        # image = deepcopy(image)
         if self.resizer_resolution == (0, 0):
             return image
         return self.resize_func(image, self.resizer_resolution)
@@ -178,9 +178,10 @@ class Realsense:
         if self.image:
             color_frame = aligned_frames.get_color_frame()
             depth_frame = aligned_frames.get_depth_frame()
+            
             depth_units = depth_frame.get_units()
             data_dict["image"] = {self.serial_number: self._process_frame(color_frame)}
-            data_dict["depth"] = {self.serial_number: self._process_frame(depth_frame) * depth_units}
+            data_dict["depth"] = {self.serial_number: self._process_frame(depth_frame).astype(np.float32) * depth_units}
 
         return data_dict, timestamp_dict
 
