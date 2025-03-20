@@ -12,7 +12,7 @@ robot_serial_number = "295341-2320008"
 # Camera ID's #
 hand_camera_id = "243222071972"
 varied_camera_1_id = "243522075067"
-varied_camera_2_id = ""
+varied_camera_2_id = "243322071546"
 
 # Charuco Board Params #
 CHARUCOBOARD_ROWCOUNT = 9
