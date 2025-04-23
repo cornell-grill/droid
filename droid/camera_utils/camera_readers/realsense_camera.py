@@ -87,10 +87,10 @@ class Realsense:
         self.skip_reading = not any([self.image, self.depth, self.pointcloud])
 
         if self.resize_func is None:
-            self.rgb_resolution = (640, 480)
+            self.rgb_resolution = (1280, 720)
             self.resizer_resolution = (0, 0)
         else:
-            self.rgb_resolution = (640, 480)
+            self.rgb_resolution = (1280, 720)
             self.resizer_resolution = self.traj_resolution
 
         self._configure_camera()
@@ -103,8 +103,8 @@ class Realsense:
         pipeline = rs.pipeline()
         config = rs.config()
         config.enable_device(self.serial_number)
-        config.enable_stream(rs.stream.depth,  640, 480, rs.format.z16, 30)
-        config.enable_stream(rs.stream.color,  640, 480, rs.format.bgr8, 30)
+        config.enable_stream(rs.stream.depth,  1280, 720, rs.format.z16, 30)
+        config.enable_stream(rs.stream.color,  1280, 720, rs.format.rgb8, 30)
 
         cfg = pipeline.start(config)
         self.pipeline = pipeline
@@ -139,8 +139,8 @@ class Realsense:
             self.pipeline.stop()
         pipeline = rs.pipeline()
         config = rs.config()
-        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        config.enable_stream(rs.stream.depth, 1280, 720, rs.format.z16, 30)
+        config.enable_stream(rs.stream.color, 1280, 720, rs.format.bgr8, 30)
         config.enable_record_to_file(filename)
         pipeline.start(config)
         self.pipeline = pipeline
