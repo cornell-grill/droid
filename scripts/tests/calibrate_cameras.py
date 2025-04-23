@@ -10,7 +10,7 @@ hand_camera_id = "243222071972"
 ext_camera_id = "243522075067"
 ext_left_camera_id = "243322071546"
 
-# input("Ready? Press Enter to continue calibrating hand camera...")
-# calibrate_camera(env, hand_camera_id, controller)
-input("Press Enter to continue third person camera calibration...")
-calibrate_camera(env, ext_left_camera_id, controller)
+input("Ready? Press Enter to continue calibrating camera...")
+calibrate_camera(env, ext_camera_id, controller)
+# input("Press Enter to continue third person camera calibration...")
+# calibrate_camera(env, ext_left_camera_id, controller)
