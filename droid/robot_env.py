@@ -98,7 +98,7 @@ class RobotEnv(gym.Env):
         # Adjust gripper camere by current pose
         extrinsics = deepcopy(self.calibration_dict)
         for cam_id in self.calibration_dict:
-            if hand_camera_id not in cam_id:
+            if hand_camera_id != cam_id:
                 continue
             gripper_pose = state_dict["cartesian_position"]
             extrinsics[cam_id + "_gripper_offset"] = extrinsics[cam_id]
