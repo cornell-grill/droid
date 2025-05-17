@@ -28,12 +28,29 @@ def gather_zed_cameras():
 
 resize_func_map = {"cv2": cv2.resize, None: None}
 
+# https://www.stereolabs.com/docs/api/python/classpyzed_1_1sl_1_1InitParameters.html
 standard_params = dict(
-    depth_minimum_distance=0.1, camera_resolution=sl.RESOLUTION.HD720, depth_stabilization=False, camera_fps=60, camera_image_flip=sl.FLIP_MODE.OFF
+    camera_resolution=sl.RESOLUTION.HD720, 
+    camera_fps=60, 
+    depth_mode=sl.DEPTH_MODE.NEURAL,
+    depth_minimum_distance=0.3, 
+    depth_maximum_distance=1.5,
+    depth_stabilization=2,
+    # depth_stabilization=False, 
+    coordinate_units=sl.UNIT.MILLIMETER,
+    camera_image_flip=sl.FLIP_MODE.AUTO
 )
 
 advanced_params = dict(
-    depth_minimum_distance=0.1, camera_resolution=sl.RESOLUTION.HD2K, depth_stabilization=False, camera_fps=15, camera_image_flip=sl.FLIP_MODE.OFF
+    camera_resolution=sl.RESOLUTION.HD2K, 
+    camera_fps=15, 
+    depth_mode=sl.DEPTH_MODE.NEURAL,
+    depth_minimum_distance=0.3, 
+    depth_maximum_distance=1.5,
+    depth_stabilization=2, 
+    # depth_stabilization=False, 
+    coordinate_units=sl.UNIT.MILLIMETER,
+    camera_image_flip=sl.FLIP_MODE.AUTO
 )
 
 
@@ -59,7 +76,7 @@ class ZedCamera:
     def set_reading_parameters(
         self,
         image=True,
-        depth=False,
+        depth=True,
         pointcloud=False,
         concatenate_images=False,
         resolution=(0, 0),
@@ -202,12 +219,13 @@ class ZedCamera:
                     self.serial_number + "_left": self._process_frame(self._left_img),
                     self.serial_number + "_right": self._process_frame(self._right_img),
                 }
-        # if self.depth:
-        # 	self._cam.retrieve_measure(self._left_depth, sl.MEASURE.DEPTH, resolution=self.resolution)
-        # 	self._cam.retrieve_measure(self._right_depth, sl.MEASURE.DEPTH_RIGHT, resolution=self.resolution)
-        # 	data_dict['depth'] = {
-        # 		self.serial_number + '_left': self._left_depth.get_data().copy(),
-        # 		self.serial_number + '_right': self._right_depth.get_data().copy()}
+        if self.depth:
+            self._cam.retrieve_measure(self._left_depth, sl.MEASURE.DEPTH, resolution=self.zed_resolution)
+            # self._cam.retrieve_measure(self._right_depth, sl.MEASURE.DEPTH_RIGHT, resolution=self.resolution)
+            data_dict['depth'] = {
+        		self.serial_number + '_left': self._left_depth.get_data().copy(),
+        		# self.serial_number + '_right': self._right_depth.get_data().copy()
+            }
         # if self.pointcloud:
         # 	self._cam.retrieve_measure(self._left_pointcloud, sl.MEASURE.XYZRGBA, resolution=self.resolution)
         # 	self._cam.retrieve_measure(self._right_pointcloud, sl.MEASURE.XYZRGBA_RIGHT, resolution=self.resolution)

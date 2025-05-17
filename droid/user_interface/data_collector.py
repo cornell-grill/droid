@@ -131,7 +131,7 @@ class DataCollecter:
     def check_calibration_info(self, remove_hand_camera=False):
         info_dict = check_calibration_info(self.full_cam_ids)
         if remove_hand_camera:
-            info_dict["old"] = [cam_id for cam_id in info_dict["old"] if (hand_camera_id not in cam_id)]
+            info_dict["old"] = [cam_id for cam_id in info_dict["old"] if (hand_camera_id != cam_id)]
         return info_dict
 
     def get_gui_imgs(self, obs):
