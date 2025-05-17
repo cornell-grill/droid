@@ -37,20 +37,20 @@ standard_params = dict(
     depth_maximum_distance=1.5,
     depth_stabilization=2,
     # depth_stabilization=False, 
-    coordinate_units=sl.UNIT.MILLIMETER,
-    camera_image_flip=sl.FLIP_MODE.AUTO
+    coordinate_units=sl.UNIT.METER,
+    camera_image_flip=sl.FLIP_MODE.OFF
 )
 
 advanced_params = dict(
     camera_resolution=sl.RESOLUTION.HD2K, 
     camera_fps=15, 
     depth_mode=sl.DEPTH_MODE.NEURAL,
-    depth_minimum_distance=0.3, 
+    depth_minimum_distance=0.3,
     depth_maximum_distance=1.5,
     depth_stabilization=2, 
     # depth_stabilization=False, 
-    coordinate_units=sl.UNIT.MILLIMETER,
-    camera_image_flip=sl.FLIP_MODE.AUTO
+    coordinate_units=sl.UNIT.METER,
+    camera_image_flip=sl.FLIP_MODE.OFF
 )
 
 
