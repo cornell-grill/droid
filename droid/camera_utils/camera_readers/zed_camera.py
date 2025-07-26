@@ -81,6 +81,7 @@ class ZedCamera:
         concatenate_images=False,
         resolution=(0, 0),
         resize_func=None,
+        flipped=True,
     ):
         # Non-Permenant Values #
         self.traj_image = image
@@ -91,6 +92,7 @@ class ZedCamera:
         self.depth = depth
         self.pointcloud = pointcloud
         self.resize_func = resize_func_map[resize_func]
+        self.flipped = flipped
 
     ### Camera Modes ###
     def set_calibration_mode(self):
@@ -148,7 +150,7 @@ class ZedCamera:
         self._current_params = init_params
         sl_params = sl.InitParameters(**init_params)
         sl_params.set_from_serial_number(int(self.serial_number))
-        sl_params.camera_image_flip = sl.FLIP_MODE.OFF
+        sl_params.camera_image_flip = sl.FLIP_MODE.OFF if not self.flipped else sl.FLIP_MODE.ON
         if not self.depth:
             sl_params.depth_mode = sl.DEPTH_MODE.NONE
         status = self._cam.open(sl_params)
@@ -157,16 +159,19 @@ class ZedCamera:
 
         # Save Intrinsics #
         self.latency = int(2.5 * (1e3 / sl_params.camera_fps))
-        calib_params = self._cam.get_camera_information().camera_configuration.calibration_parameters
+        cam_config = self._cam.get_camera_information().camera_configuration
+        calib_params = cam_config.calibration_parameters
         self._intrinsics = {
             self.serial_number + "_left": self._process_intrinsics(calib_params.left_cam),
             self.serial_number + "_right": self._process_intrinsics(calib_params.right_cam),
         }
 
     ### Calibration Utilities ###
-    def _process_intrinsics(self, params):
+    def _process_intrinsics(self, resolution : sl.Resolution, params : sl.CameraParameters):
+        cx = params.cx if not self.flipped else resolution.width - 1 - params.cx
+        cy = params.cy if not self.flipped else resolution.height - 1 - params.cy
         intrinsics = {}
-        intrinsics["cameraMatrix"] = np.array([[params.fx, 0, params.cx], [0, params.fy, params.cy], [0, 0, 1]])
+        intrinsics["cameraMatrix"] = np.array([[params.fx, 0, cx], [0, params.fy, cy], [0, 0, 1]])
         intrinsics["distCoeffs"] = np.array(list(params.disto))
         return intrinsics
 
