@@ -33,7 +33,7 @@ standard_params = dict(
     camera_resolution=sl.RESOLUTION.HD720, 
     camera_fps=60, 
     depth_mode=sl.DEPTH_MODE.NEURAL,
-    depth_minimum_distance=0.3, 
+    depth_minimum_distance=0.2, 
     depth_maximum_distance=1.5,
     depth_stabilization=2,
     # depth_stabilization=False, 
@@ -45,7 +45,7 @@ advanced_params = dict(
     camera_resolution=sl.RESOLUTION.HD2K, 
     camera_fps=15, 
     depth_mode=sl.DEPTH_MODE.NEURAL,
-    depth_minimum_distance=0.3,
+    depth_minimum_distance=0.2,
     depth_maximum_distance=1.5,
     depth_stabilization=2, 
     # depth_stabilization=False, 
@@ -76,7 +76,7 @@ class ZedCamera:
     def set_reading_parameters(
         self,
         image=True,
-        depth=True,
+        depth=False,
         pointcloud=False,
         concatenate_images=False,
         resolution=(0, 0),
@@ -149,6 +149,8 @@ class ZedCamera:
         sl_params = sl.InitParameters(**init_params)
         sl_params.set_from_serial_number(int(self.serial_number))
         sl_params.camera_image_flip = sl.FLIP_MODE.OFF
+        if not self.depth:
+            sl_params.depth_mode = sl.DEPTH_MODE.NONE
         status = self._cam.open(sl_params)
         if status != sl.ERROR_CODE.SUCCESS:
             raise RuntimeError("Camera Failed To Open")
