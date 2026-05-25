@@ -20,6 +20,10 @@ def gather_zed_cameras():
         return []
 
     for cam in cameras:
+        # Added to skip the missing camera
+        if cam.serial_number == 0:
+            print(f"Skipping ZED with unexpected serial: {cam.serial_number}")
+            continue
         cam = ZedCamera(cam)
         all_zed_cameras.append(cam)
 
@@ -34,8 +38,8 @@ standard_params = dict(
     camera_fps=60, 
     depth_mode=sl.DEPTH_MODE.NEURAL,
     depth_minimum_distance=0.2, 
-    depth_maximum_distance=1.5,
-    depth_stabilization=2,
+    depth_maximum_distance=2.0,
+    # depth_stabilization=2,
     # depth_stabilization=False, 
     coordinate_units=sl.UNIT.METER,
     camera_image_flip=sl.FLIP_MODE.OFF
@@ -46,8 +50,8 @@ advanced_params = dict(
     camera_fps=15, 
     depth_mode=sl.DEPTH_MODE.NEURAL,
     depth_minimum_distance=0.2,
-    depth_maximum_distance=1.5,
-    depth_stabilization=2, 
+    depth_maximum_distance=2.0,
+    # depth_stabilization=2, 
     # depth_stabilization=False, 
     coordinate_units=sl.UNIT.METER,
     camera_image_flip=sl.FLIP_MODE.OFF
@@ -81,7 +85,10 @@ class ZedCamera:
         concatenate_images=False,
         resolution=(0, 0),
         resize_func=None,
-        flipped=True,
+        flipped=False,
+        auto_exposure_gain=True,
+        exposure=None,
+        gain=None,
     ):
         # Non-Permenant Values #
         self.traj_image = image
@@ -93,6 +100,9 @@ class ZedCamera:
         self.pointcloud = pointcloud
         self.resize_func = resize_func_map[resize_func]
         self.flipped = flipped
+        self.auto_exposure_gain = auto_exposure_gain
+        self.exposure = exposure
+        self.gain = gain
 
     ### Camera Modes ###
     def set_calibration_mode(self):
@@ -156,14 +166,15 @@ class ZedCamera:
         status = self._cam.open(sl_params)
         if status != sl.ERROR_CODE.SUCCESS:
             raise RuntimeError("Camera Failed To Open")
+        self._apply_camera_settings()
 
         # Save Intrinsics #
         self.latency = int(2.5 * (1e3 / sl_params.camera_fps))
         cam_config = self._cam.get_camera_information().camera_configuration
         calib_params = cam_config.calibration_parameters
         self._intrinsics = {
-            self.serial_number + "_left": self._process_intrinsics(calib_params.left_cam),
-            self.serial_number + "_right": self._process_intrinsics(calib_params.right_cam),
+            self.serial_number + "_left": self._process_intrinsics(cam_config.resolution, calib_params.left_cam),
+            self.serial_number + "_right": self._process_intrinsics(cam_config.resolution, calib_params.right_cam),
         }
 
     ### Calibration Utilities ###
@@ -174,6 +185,22 @@ class ZedCamera:
         intrinsics["cameraMatrix"] = np.array([[params.fx, 0, cx], [0, params.fy, cy], [0, 0, 1]])
         intrinsics["distCoeffs"] = np.array(list(params.disto))
         return intrinsics
+
+    def _set_camera_setting(self, setting, value):
+        status = self._cam.set_camera_settings(setting, int(value))
+        if status != sl.ERROR_CODE.SUCCESS:
+            raise RuntimeError(f"Failed to set ZED camera setting {setting} to {value}: {status}")
+
+    def _apply_camera_settings(self):
+        if self.auto_exposure_gain and self.exposure is None and self.gain is None:
+            return
+
+        if not self.auto_exposure_gain:
+            self._set_camera_setting(sl.VIDEO_SETTINGS.AEC_AGC, 0)
+        if self.exposure is not None:
+            self._set_camera_setting(sl.VIDEO_SETTINGS.EXPOSURE, self.exposure)
+        if self.gain is not None:
+            self._set_camera_setting(sl.VIDEO_SETTINGS.GAIN, self.gain)
 
     def get_intrinsics(self):
         return deepcopy(self._intrinsics)
